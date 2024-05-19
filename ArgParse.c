@@ -1,0 +1,97 @@
+#include <argp.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include "Defines.h"
+#include "ArgParse.h"
+
+const char *argp_program_version = "nzip (Nano ZIP) 0.1";
+const char *argp_program_bug_address = "andshvets@yandex.ru";
+static char doc[] = "Simple program for compressing files with basic ZIP algorithm.";
+static char args_doc[] = "filename [ARCHIVE.zip]";
+
+static struct argp_option options[] = {
+        {"bs", 'b', "SIZE", OPTION_ARG_OPTIONAL, "Block size (e.g., 1K, 16K, 5M). bs=4K by default. bs must be greater than 4K and divisible by 4K."},
+        {"verbose", 'v', 0, 0, "Verbose output"},
+        {0}
+};
+
+static error_t parse_opt(int key, char *arg, struct argp_state *state) {
+    struct arguments *arguments = state->input;
+
+    switch (key) {
+        case 'b':
+            if (!arg)
+                argp_usage(state);
+            arguments->block_size = arg;
+            break;
+        case 'v':
+            arguments->verbose = true;
+            break;
+        case ARGP_KEY_ARG:
+            if (state->arg_num >= 2)
+                argp_usage(state);
+            arguments->args[state->arg_num] = arg;
+            break;
+        case ARGP_KEY_END:
+            if (state->arg_num < 1) // Must at least have one filename argument
+                argp_usage(state);
+            break;
+        default:
+            return ARGP_ERR_UNKNOWN;
+    }
+    return 0;
+}
+
+static void adjust_arguments(struct arguments *arguments) {
+    if (arguments->block_size) {
+        char *block_size = arguments->block_size;
+        if(block_size[0] == '=') {
+            block_size++;
+        }
+        if(block_size[strlen(block_size) - 1] == 'K') {
+            block_size[strlen(block_size) - 1] = '\0';
+            arguments->block_size_int = atoi(block_size) * 1024;
+        } else if(block_size[strlen(block_size) - 1] == 'M') {
+            block_size[strlen(block_size) - 1] = '\0';
+            arguments->block_size_int = atoi(block_size) * 1024 * 1024;
+        } else {
+            arguments->block_size_int = atoi(block_size);
+        }
+
+        if(arguments->block_size_int < 4096) {
+            perror("Block size must be at least than 4K\n");
+            exit(1);
+        }
+        if(arguments->block_size_int % 4096 != 0) {
+            perror("Block size must be divisible by 4K\n");
+            exit(1);
+        }
+    }
+    else{
+        arguments->block_size_int = 4096;
+    }
+    //If no archive name is provided, use the default one
+    if (!arguments->args[1]) {
+        arguments->args[1] = "archive.zip";
+    }
+}
+
+static struct argp argp = {options, parse_opt, args_doc, doc};
+
+void parse_args(int argc, char **argv, struct arguments *arguments) {
+    arguments->block_size = NULL;
+    arguments->verbose = false;
+    
+    argp_parse(&argp, argc, argv, 0, 0, arguments);
+    adjust_arguments(arguments);
+
+    DEBUG("FILENAME: %s\n", arguments->args[0]);
+    if (arguments->args[1])
+        DEBUG("ARCHIVE: %s\n", arguments->args[1])
+    if (arguments->block_size)
+        DEBUG("Block size: %d\n", arguments->block_size_int)
+    if (arguments->verbose)
+        DEBUG("Verbose output enabled\n")
+}
