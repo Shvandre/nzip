@@ -6,6 +6,7 @@ typedef struct arguments {
     char *block_size;
     bool verbose;
     int block_size_int;
+    int compression_level;
 } Arguments;
 
 void parse_args(int argc, char **argv, struct arguments *arguments);

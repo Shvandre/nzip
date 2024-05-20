@@ -35,7 +35,7 @@ int compressFile(const Arguments* arguments) {
         DEBUG("Mapped size: %ld\n", mapped_size);
 
         size_t produced_size = 0;
-        int ret = compressBlock(&strm, next_block, mapped_size, out, arguments->block_size_int, &produced_size, Z_NO_FLUSH);
+        int ret = compressBlock(arguments, &strm, next_block, mapped_size, out, arguments->block_size_int, &produced_size, Z_NO_FLUSH);
         if(ret != Z_OK) {
             perror("Error compressing the block");
             return 1;
@@ -50,7 +50,7 @@ int compressFile(const Arguments* arguments) {
         mapped_size = map_file(0, arguments->block_size_int, &next_block);
     }
     size_t prod_size = 0;
-    compressBlock(&strm, NULL, 0, out, arguments->block_size_int, &prod_size, Z_FINISH); // Finalize the compression
+    compressBlock(arguments, &strm, NULL, 0, out, arguments->block_size_int, &prod_size, Z_FINISH); // Finalize the compression
     fwrite(out, 1, prod_size, archive);
     fclose(archive);
     return 0;

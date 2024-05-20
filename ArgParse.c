@@ -1,4 +1,5 @@
 #include <argp.h>
+#include <zlib.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -14,6 +15,7 @@ static char args_doc[] = "filename [ARCHIVE.zip]";
 static struct argp_option options[] = {
         {"bs", 'b', "SIZE", OPTION_ARG_OPTIONAL, "Block size (e.g., 1K, 16K, 5M). bs=4K by default. bs must be greater than 4K and divisible by 4K."},
         {"verbose", 'v', 0, 0, "Verbose output"},
+        {"compression", 'c', "LEVEL", OPTION_ARG_OPTIONAL, "Compression level (0-9) 0 means NO_COMPRESSION, 9 - MAX_COMPRESSION."},
         {0}
 };
 
@@ -28,6 +30,15 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
             break;
         case 'v':
             arguments->verbose = true;
+            break;
+        case 'c':
+            if (!arg)
+                argp_usage(state);
+            arguments->compression_level = atoi(arg);
+            if (arguments->compression_level < 0 || arguments->compression_level > 9) {
+                perror("Compression level must be between 0 and 9\n");
+                exit(1);
+            }
             break;
         case ARGP_KEY_ARG:
             if (state->arg_num >= 2)
@@ -75,6 +86,10 @@ static void adjust_arguments(struct arguments *arguments) {
     //If no archive name is provided, use the default one
     if (!arguments->args[1]) {
         arguments->args[1] = "archive.zip";
+    }
+
+    if(!arguments->compression_level) {
+        arguments->compression_level = Z_DEFAULT_COMPRESSION;
     }
 }
 

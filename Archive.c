@@ -1,26 +1,27 @@
 #include "Archive.h"
+#include "ArgParse.h"
 #include <zlib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
-static void compressInit(z_stream *stream) {
+static void compressInit(z_stream *stream, const Arguments* arguments) {
     stream->zalloc = Z_NULL;
     stream->zfree = Z_NULL;
     stream->opaque = Z_NULL;
 
     // Initialize the compressor with default settings.
-    if (deflateInit(stream, Z_DEFAULT_COMPRESSION) != Z_OK) {
+    if (deflateInit(stream, arguments->compression_level) != Z_OK) {
         perror("Could not initialize the compressor\n");
         exit(1);
     }
 }
 
 
-int compressBlock(z_stream* strm, unsigned char *in, size_t inSize, unsigned char *out, size_t outSize, size_t *produced, int flush) {
+int compressBlock(const Arguments* arguments, z_stream* strm, unsigned char *in, size_t inSize, unsigned char *out, size_t outSize, size_t *produced, int flush) {
     static int initialized = 0;
     if (!initialized) {
-        compressInit(strm);
+        compressInit(strm, arguments);
         initialized = 1;
     }
     int ret;
