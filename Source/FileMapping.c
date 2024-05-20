@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 
-size_t map_file(const char* filename, long long size, char** dest) { //Works like strtok. Warning: This function is not thread-safe.
+long long map_file(const char* filename, size_t size, unsigned char** dest) { //Works like strtok. Warning: This function is not thread-safe.
     static int fd = -1;                // File descriptor
     static size_t current_offset = 0;  // Current offset in the file
     static size_t file_size = 0;       // File size
@@ -47,7 +47,7 @@ size_t map_file(const char* filename, long long size, char** dest) { //Works lik
     size_t mapping_size = (current_offset + size > file_size) ? (file_size - current_offset) : size;
 
     // Actually map the file
-    *dest = mmap(NULL, mapping_size, PROT_READ, MAP_PRIVATE, fd, current_offset);
+    *dest = mmap(NULL, mapping_size, PROT_READ, MAP_PRIVATE, fd, (long)current_offset);
     if (*dest == MAP_FAILED) {
         perror("Error mapping the file");
         return -1;
@@ -56,5 +56,5 @@ size_t map_file(const char* filename, long long size, char** dest) { //Works lik
     // Update the offset
     current_offset += mapping_size;
 
-    return mapping_size;
+    return (long long)mapping_size;
 }

@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include "ArgParse.h"
-#include "Tools.h"
+#include "Source/ArgParse.h"
+#include "Source/Tools.h"
 int main(int argc, char **argv)
 {
     Arguments arguments;

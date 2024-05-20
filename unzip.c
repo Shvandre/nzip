@@ -1,7 +1,8 @@
 #include <stdio.h>
-#include "ArgParse.h"
-#include "Tools.h"
+#include "Source/ArgParse.h"
+#include "Source/Tools.h"
 #include <string.h>
+
 int main(int argc, char **argv)
 {
     if(argc < 2) {

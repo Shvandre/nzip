@@ -26,13 +26,13 @@ int compressFile(const Arguments* arguments) {
     unsigned char *out;
     xmalloc(out, arguments->block_size_int);
 
-    char *next_block;
-    size_t mapped_size;
+    unsigned char *next_block;
+    long long mapped_size;
 
     z_stream strm;
     mapped_size = map_file(arguments->args[0], arguments->block_size_int, &next_block);
     while(mapped_size != -1) {
-        DEBUG("Mapped size: %ld\n", mapped_size);
+        DEBUG("Mapped size: %lld\n", mapped_size);
 
         size_t produced_size = 0;
         int ret = compressBlock(arguments, &strm, next_block, mapped_size, out, arguments->block_size_int, &produced_size, Z_NO_FLUSH);

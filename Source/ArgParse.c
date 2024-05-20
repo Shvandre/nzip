@@ -13,9 +13,9 @@ static char doc[] = "Simple program for compressing files with basic ZIP algorit
 static char args_doc[] = "filename [ARCHIVE.zip]";
 
 static struct argp_option options[] = {
-        {"bs", 'b', "SIZE", OPTION_ARG_OPTIONAL, "Block size (e.g., 1K, 16K, 5M). bs=4K by default. bs must be greater than 4K and divisible by 4K."},
-        {"verbose", 'v', 0, 0, "Verbose output"},
-        {"compression", 'c', "LEVEL", OPTION_ARG_OPTIONAL, "Compression level (0-9) 0 means NO_COMPRESSION, 9 - MAX_COMPRESSION."},
+        {"bs", 'b', "SIZE", OPTION_ARG_OPTIONAL, "Block size (e.g., 1K, 16K, 5M). bs=4K by default. bs must be greater than 4K and divisible by 4K.", 0},
+        {"verbose", 'v', 0, 0, "Verbose output", 0},
+        {"compression", 'c', "LEVEL", OPTION_ARG_OPTIONAL, "Compression level (0-9) 0 means NO_COMPRESSION, 9 - MAX_COMPRESSION.", 0},
         {0}
 };
 
@@ -93,7 +93,7 @@ static void adjust_arguments(struct arguments *arguments) {
     }
 }
 
-static struct argp argp = {options, parse_opt, args_doc, doc};
+static struct argp argp = {options, parse_opt, args_doc, doc, 0, 0, 0};
 
 void parse_args(int argc, char **argv, struct arguments *arguments) {
     arguments->block_size = NULL;
@@ -103,10 +103,13 @@ void parse_args(int argc, char **argv, struct arguments *arguments) {
     adjust_arguments(arguments);
 
     DEBUG("FILENAME: %s\n", arguments->args[0]);
-    if (arguments->args[1])
+    if (arguments->args[1]) {
         DEBUG("ARCHIVE: %s\n", arguments->args[1])
-    if (arguments->block_size)
+    }
+    if (arguments->block_size) {
         DEBUG("Block size: %d\n", arguments->block_size_int)
-    if (arguments->verbose)
+    }
+    if (arguments->verbose) {
         DEBUG("Verbose output enabled\n")
+    }
 }
