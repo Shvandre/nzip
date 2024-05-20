@@ -43,3 +43,65 @@ int compressBlock(z_stream* strm, unsigned char *in, size_t inSize, unsigned cha
 
     return ret;
 }
+
+#include <stdlib.h>
+
+int decompress_buffer_dynamic(unsigned char *in, size_t in_length, unsigned char **out, size_t *out_length) {
+    z_stream strm;
+    int ret;
+    size_t buffer_size = *out_length;
+    unsigned char *buffer = malloc(buffer_size);
+
+    if (!buffer) {
+        return -1; // Ошибка выделения памяти
+    }
+
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = in_length;
+    strm.next_in = in;
+    strm.avail_out = buffer_size;
+    strm.next_out = buffer;
+
+    if (inflateInit(&strm) != Z_OK) {
+        free(buffer);
+        return -1;
+    }
+
+    do {
+        ret = inflate(&strm, Z_NO_FLUSH);
+        if (ret == Z_STREAM_ERROR) {
+            (void)inflateEnd(&strm);
+            free(buffer);
+            return -1;
+        }
+
+        if (strm.avail_out == 0) {
+            buffer_size *= 2; // Удвоение размера буфера
+            unsigned char *new_buffer = realloc(buffer, buffer_size);
+            if (!new_buffer) {
+                (void)inflateEnd(&strm);
+                free(buffer);
+                return -1;
+            }
+            buffer = new_buffer;
+            strm.next_out = buffer + strm.total_out;
+            strm.avail_out = buffer_size - strm.total_out;
+        }
+    } while (ret != Z_STREAM_END);
+
+    (void)inflateEnd(&strm);
+
+    if (ret != Z_STREAM_END) {
+        free(buffer);
+        return -1;
+    }
+
+    *out = buffer;
+    *out_length = strm.total_out;
+    return 0;
+}
+
+
+
