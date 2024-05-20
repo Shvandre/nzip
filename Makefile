@@ -1,7 +1,7 @@
 CC=gcc
-CFLAGS=-std=c11 -DDEBUG_MODE -Wall -Wextra
+CFLAGS=-std=c11 -DDEBUG_MODE -Wall -Wextra -g
 LDFLAGS=-lz
-SANFLAGS=-fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+SANFLAGS=-g -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 
 # Source files
 SOURCES=$(wildcard Source/*.c)
@@ -16,11 +16,11 @@ build: zip unzip
 build-san: zip-san unzip-san
 
 # zip executable
-zip: $(SOURCES) zip.c
+zip: $(SOURCES) zip.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 # unzip executable
-unzip: $(SOURCES) unzip.c
+unzip: $(SOURCES) unzip.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 # zip executable with sanitizers
