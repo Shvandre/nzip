@@ -14,7 +14,7 @@ static char args_doc[] = "filename [ARCHIVE.zip]";
 
 static struct argp_option options[] = {
         {"bs", 'b', "SIZE", OPTION_ARG_OPTIONAL, "Block size (e.g., 1K, 16K, 5M). bs=4K by default. bs must be greater than 4K and divisible by 4K.", 0},
-        {"verbose", 'v', 0, 0, "Verbose output", 0},
+        {"silent", 's', 0, 0, "Verbose output", 0},
         {"compression", 'c', "LEVEL", OPTION_ARG_OPTIONAL, "Compression level (0-9) 0 means NO_COMPRESSION, 9 - MAX_COMPRESSION.", 0},
         {0}
 };
@@ -28,15 +28,16 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
                 argp_usage(state);
             arguments->block_size = arg;
             break;
-        case 'v':
-            arguments->verbose = true;
+        case 's':
+            arguments->silent = true;
             break;
         case 'c':
             if (!arg)
                 argp_usage(state);
             arguments->compression_level = atoi(arg);
             if (arguments->compression_level < 0 || arguments->compression_level > 9) {
-                perror("Compression level must be between 0 and 9\n");
+                if(!arguments->silent)
+                    perror("Compression level must be between 0 and 9\n");
                 exit(1);
             }
             break;
@@ -58,6 +59,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 static void adjust_arguments(struct arguments *arguments) {
     if (arguments->block_size) {
         char *block_size = malloc(strlen(arguments->block_size) + 1);
+        char* mem_block_size = block_size;
         strcpy(block_size, arguments->block_size);
         if(block_size[0] == '=') {
             block_size++;
@@ -71,14 +73,16 @@ static void adjust_arguments(struct arguments *arguments) {
         } else {
             arguments->block_size_int = atoi(block_size);
         }
-        free(block_size);
+        free(mem_block_size);
 
         if(arguments->block_size_int < 4096) {
-            perror("Block size must be at least than 4K\n");
+            if(!arguments->silent)
+                perror("Block size must be at least than 4K\n");
             exit(1);
         }
         if(arguments->block_size_int % 4096 != 0) {
-            perror("Block size must be divisible by 4K\n");
+            if(!arguments->silent)
+                perror("Block size must be divisible by 4K\n");
             exit(1);
         }
     }
@@ -99,7 +103,6 @@ static struct argp argp = {options, parse_opt, args_doc, doc, 0, 0, 0};
 
 void parse_args(int argc, char **argv, struct arguments *arguments) {
     arguments->block_size = NULL;
-    arguments->verbose = false;
     
     argp_parse(&argp, argc, argv, 0, 0, arguments);
     adjust_arguments(arguments);
@@ -111,7 +114,7 @@ void parse_args(int argc, char **argv, struct arguments *arguments) {
     if (arguments->block_size) {
         DEBUG("Block size: %d\n", arguments->block_size_int)
     }
-    if (arguments->verbose) {
-        DEBUG("Verbose output enabled\n")
+    if (arguments->silent) {
+        DEBUG("Silence errors enabled\n")
     }
 }

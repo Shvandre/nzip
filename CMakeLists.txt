@@ -22,4 +22,4 @@ add_library(code STATIC ${SOURCE_FILES})
 
 # Тесты
 add_executable(runTests Tests.cpp)
-target_link_libraries(runTests gtest gtest_main code)
+target_link_libraries(runTests gtest gtest_main code z)

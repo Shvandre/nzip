@@ -12,7 +12,8 @@ static void compressInit(z_stream *stream, const Arguments* arguments) {
 
     // Initialize the compressor with default settings.
     if (deflateInit(stream, arguments->compression_level) != Z_OK) {
-        perror("Could not initialize the compressor\n");
+        if(!arguments->silent)
+            perror("Could not initialize the compressor\n");
         exit(1);
     }
 }

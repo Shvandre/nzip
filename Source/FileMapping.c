@@ -1,4 +1,5 @@
 #include "FileMapping.h"
+#include "Defines.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
@@ -39,7 +40,7 @@ long long map_file(const char* filename, size_t size, unsigned char** dest) { //
     }
 
     if (current_offset >= file_size) {
-        perror("Meeted EOF\n");
+        DEBUG("Meeted EOF\n");
         return -1;
     }
 

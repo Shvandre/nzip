@@ -1,6 +1,6 @@
 CC=gcc
 CXX=g++
-CFLAGS=-std=c11 --coverage -DDEBUG_MODE -Wall -Wextra -g -fpermissive
+CFLAGS=-std=c11 --coverage -Wall -Wextra -g -fpermissive
 LDFLAGS=-lz --coverage
 SANFLAGS=-g -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 GTEST_LIBS = -lgtest -lgtest_main -pthread
@@ -40,7 +40,7 @@ tests: Tests.o $(OBJS)
 
 coverage: tests
 	lcov --capture --directory Source --output-file coverage.info
-	genhtml coverage.info --output-directory coverage\
+	genhtml coverage.info --output-directory coverage
 	gcov Source/*.c
 	echo "Graphical coverage report is in coverage/index.html"
 	echo "To view the report, open coverage/index.html in a web browser or run 'xdg-open coverage/index.html'"

@@ -17,10 +17,16 @@ int compressFile(const Arguments* arguments) {
         DEBUG("Trap flag is set\n");
         exit(0); // В реальном коде лучше будет передать управление куда-нибудь подальше в junk-код
     }
-
+    //Check if input file exists
+    if (access(arguments->args[0], F_OK) == -1) {
+        if(!arguments->silent)
+            perror("Input file does not exist");
+        return 1;
+    }
     FILE *archive = fopen(arguments->args[1], "wb");
     if (archive == NULL) {
-        perror("Error opening the archive");
+        if(!arguments->silent)
+            perror("Error opening the archive");
         exit(1);
     }
     unsigned char *out;
@@ -37,14 +43,16 @@ int compressFile(const Arguments* arguments) {
         size_t produced_size = 0;
         int ret = compressBlock(arguments, &strm, next_block, mapped_size, out, arguments->block_size_int, &produced_size, Z_NO_FLUSH);
         if(ret != Z_OK) {
-            perror("Error compressing the block");
+            if(!arguments->silent)
+                perror("Error compressing the block");
             return 1;
         }
 
         fwrite(out, 1, produced_size, archive);
         // Очистка маппинга
         if (munmap(next_block, mapped_size) == -1) {
-            perror("Error un-mapping the file");
+            if(!arguments->silent)
+                perror("Error un-mapping the file");
             return 1; //But this is not a fatal error
         }
         mapped_size = map_file(0, arguments->block_size_int, &next_block);
