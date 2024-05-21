@@ -10,7 +10,7 @@ CXXFLAGS = -std=c++11 -Wall -Wextra -g -fpermissive --coverage
 SOURCES=$(wildcard Source/*.c)
 OBJS = $(SOURCES:.c=.o)
 # Default build
-all: build
+all: build-san
 
 # Custom target to build both executables
 build: zip unzip
@@ -37,8 +37,13 @@ unzip-san: unzip.o $(OBJS)
 tests: Tests.o $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(GTEST_LIBS) $(LDFLAGS)
 	./tests
-	gcov Source/*.c
 
+coverage: tests
+	lcov --capture --directory Source --output-file coverage.info
+	genhtml coverage.info --output-directory coverage\
+	gcov Source/*.c
+	echo "Graphical coverage report is in coverage/index.html"
+	echo "To view the report, open coverage/index.html in a web browser or run 'xdg-open coverage/index.html'"
 
 # To manage object files
 %.o: %.c
@@ -53,6 +58,7 @@ analyze:
 
 # Clean build files
 clean:
-	rm -f *.o zip unzip zip-san unzip-san Source/*.o Source/*.gcno Source/*.gcda Source/*.gcov tests tests.o *.gcno *.gcda *.gcov
+	rm -f *.o zip unzip zip-san unzip-san Source/*.o Source/*.gcno Source/*.gcda Source/*.gcov tests tests.o *.gcno *.gcda *.gcov coverage.info
+	rm -rf coverage
 
 .PHONY: all build build-san clean

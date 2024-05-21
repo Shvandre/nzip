@@ -24,6 +24,7 @@ TEST(TestArgs, TestArgs2) {
     ASSERT_EQ(arguments.verbose, 1);
 }
 
+
 TEST(TestArgs, TestWrongArgs) {
     Arguments arguments;
     char* argv[] = {"zip", "--wrong-arg", "file", "-ABA"};
