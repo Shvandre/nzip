@@ -51,7 +51,7 @@ int decompress_buffer_dynamic(unsigned char *in, size_t in_length, unsigned char
     z_stream strm;
     int ret;
     size_t buffer_size = *out_length;
-    unsigned char *buffer = malloc(buffer_size);
+    unsigned char *buffer = (unsigned char*)malloc(buffer_size);
 
     if (!buffer) {
         return -1; // Ошибка выделения памяти
@@ -80,7 +80,7 @@ int decompress_buffer_dynamic(unsigned char *in, size_t in_length, unsigned char
 
         if (strm.avail_out == 0) {
             buffer_size *= 2; // Удвоение размера буфера
-            unsigned char *new_buffer = realloc(buffer, buffer_size);
+            unsigned char *new_buffer = (unsigned char*)realloc(buffer, buffer_size);
             if (!new_buffer) {
                 (void)inflateEnd(&strm);
                 free(buffer);
