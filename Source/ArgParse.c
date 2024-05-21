@@ -57,7 +57,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 
 static void adjust_arguments(struct arguments *arguments) {
     if (arguments->block_size) {
-        char *block_size = arguments->block_size;
+        char *block_size = malloc(strlen(arguments->block_size) + 1);
+        strcpy(block_size, arguments->block_size);
         if(block_size[0] == '=') {
             block_size++;
         }
@@ -70,6 +71,7 @@ static void adjust_arguments(struct arguments *arguments) {
         } else {
             arguments->block_size_int = atoi(block_size);
         }
+        free(block_size);
 
         if(arguments->block_size_int < 4096) {
             perror("Block size must be at least than 4K\n");

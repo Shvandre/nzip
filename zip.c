@@ -3,7 +3,7 @@
 #include "Source/Tools.h"
 int main(int argc, char **argv)
 {
-    Arguments arguments;
+    Arguments arguments = {0};
     parse_args(argc, argv, &arguments);
     int ret = compressFile(&arguments);
     if(ret != 0) {

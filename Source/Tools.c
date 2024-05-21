@@ -53,6 +53,7 @@ int compressFile(const Arguments* arguments) {
     compressBlock(arguments, &strm, NULL, 0, out, arguments->block_size_int, &prod_size, Z_FINISH); // Finalize the compression
     fwrite(out, 1, prod_size, archive);
     fclose(archive);
+    free(out);
     return 0;
 }
 
@@ -83,7 +84,6 @@ int uncompressFile(const char* filename, const char* output_filename) {
         return 1;
     }
     unsigned char *out;
-    xmalloc(out, length);
     size_t out_length = length;
     if (decompress_buffer_dynamic((unsigned char*)in, length, &out, &out_length) == -1) {
         perror("Error decompressing the archive");
@@ -93,7 +93,6 @@ int uncompressFile(const char* filename, const char* output_filename) {
         free(out);
         return 1;
     }
-
     fwrite(out, 1, out_length, output);
 
     munmap(in, length);
