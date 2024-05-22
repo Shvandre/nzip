@@ -25,7 +25,6 @@ int compressFile(const Arguments* arguments) {
             perror("Input file does not exist");
         return 1;
     }
-    CHECK_CRC();
     FILE *archive = fopen(arguments->args[1], "wb");
     if (archive == NULL) {
         if(!arguments->silent)
@@ -37,6 +36,13 @@ int compressFile(const Arguments* arguments) {
 
     unsigned char *next_block;
     long long mapped_size;
+    
+    int ret = 0;
+    IS_DEBUGGER_PRESENT(ret);
+    if(ret) {
+        DEBUG("Debugger is present\n");
+        exit(0);
+    }
 
     z_stream strm;
     mapped_size = map_file(arguments->args[0], arguments->block_size_int, &next_block);
@@ -74,7 +80,6 @@ int uncompressFile(const char* filename, const char* output_filename) {
         perror("Error opening the archive");
         return 1;
     }
-    CHECK_CRC();
     struct stat sb;
     if (fstat(fileno(archive), &sb) == -1) {
         perror("Could not get file size");
@@ -87,7 +92,6 @@ int uncompressFile(const char* filename, const char* output_filename) {
         perror("Error opening the output file");
         return 1;
     }
-    CHECK_CRC();
     //map archive
     char* in = mmap(NULL, length, PROT_READ, MAP_PRIVATE, fileno(archive), 0);
     if (in == MAP_FAILED) {
@@ -95,6 +99,12 @@ int uncompressFile(const char* filename, const char* output_filename) {
         fclose(archive);
         fclose(output);
         return 1;
+    }
+    int ret = 0;
+    IS_DEBUGGER_PRESENT(ret);
+    if(ret) {
+        DEBUG("Debugger is present\n");
+        exit(0);
     }
     unsigned char *out;
     size_t out_length = length;

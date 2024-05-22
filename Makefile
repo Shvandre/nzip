@@ -1,10 +1,10 @@
 CC=gcc
 CXX=g++
-CFLAGS=-std=c11 --coverage -Wall -Wextra -g
+CFLAGS=-std=c11 -D_POSIX_C_SOURCE=200809L --coverage -Wall -Wextra -Wl,-z,noexecstack -fstack-protector -fstack-protector-strong -fstack-protector-all
 LDFLAGS=-lz --coverage
 SANFLAGS=-g -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 GTEST_LIBS = -lgtest -lgtest_main -pthread
-CXXFLAGS = -std=c++11 -Wall -Wextra -g -fpermissive --coverage
+CXXFLAGS = -std=c++17 -Wall -Wextra -fpermissive --coverage
 
 # Source files
 SOURCES=$(wildcard Source/*.c)
@@ -14,13 +14,9 @@ all: build-san
 
 # Custom target to build both executables
 build: zip unzip
-	python3 PostProcessing.py zip
-	python3 PostProcessing.py unzip
 
 # Build with sanitizers
 build-san: zip-san unzip-san
-	python3 PostProcessing.py zip-san
-	python3 PostProcessing.py unzip-san
 # zip executable
 zip: $(OBJS) zip.o
 	$(CC) -o $@ $^ $(LDFLAGS)
@@ -37,11 +33,12 @@ zip-san: zip.o $(OBJS)
 unzip-san: unzip.o $(OBJS)
 	$(CC) -o $@ $^ $(LDFLAGS) $(SANFLAGS)
 
-tests: Tests.o $(OBJS)
+test: Tests.o $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(GTEST_LIBS) $(LDFLAGS)
-	./tests
+	./test
 
-coverage: tests
+coverage: test
+	gcov Source/*.c
 	lcov --capture --directory Source --output-file coverage.info
 	genhtml coverage.info --output-directory coverage
 	gcov Source/*.c
@@ -61,7 +58,7 @@ analyze:
 
 # Clean build files
 clean:
-	rm -f *.o zip unzip zip-san unzip-san Source/*.o Source/*.gcno Source/*.gcda Source/*.gcov tests tests.o *.gcno *.gcda *.gcov coverage.info
+	rm -f *.o zip unzip zip-san unzip-san Source/*.o Source/*.gcno Source/*.gcda Source/*.gcov tests tests.o *.gcno *.gcda *.gcov coverage.info output.txt archive.zip test
 	rm -rf coverage
 
-.PHONY: all build build-san clean
+.PHONY: all build build-san cleanret

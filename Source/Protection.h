@@ -1,19 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <stdlib.h>
-
-uint32_t mycrc32(const char *filename);
-
-extern volatile unsigned char hash_sum[];
-extern unsigned* hash_sum_ptr;
-
-#define CHECK_CRC() \
-    if(mycrc32(0) != *hash_sum_ptr) { \
-        printf("CRC32 mismatch\n, expected %u, got %u\n", mycrc32(0), *hash_sum_ptr); \
-        exit(1); \
-    }
-
-
+#include <sys/ptrace.h>
 
 #define IS_TRAP_FLAG_SET(result) \
     __asm__ __volatile__ ( \
@@ -26,3 +14,20 @@ extern unsigned* hash_sum_ptr;
         :                            /* Нет входных параметров */ \
         : "rax"                      /* RAX испортится после выполнения */ \
     )
+
+#define IS_DEBUGGER_PRESENT(result) \
+    do { \
+        result = 0; \
+        if (ptrace(PTRACE_TRACEME, 0, NULL, 0) == -1) { \
+            result = 1; \
+        } else { \
+            ptrace(PTRACE_DETACH, 0, NULL, 0); \
+        } \
+    } while (0)
+
+#define TIME_CHECK_BEGIN() \
+    clock_t start##__LINE__ = clock();
+
+#define TIME_CHECK_END(time) \
+    if((double)(clock() - start##__LINE__) / CLOCKS_PER_SEC > time) \
+        exit(111); //Но лучше, конечно, передать управление куда-нибудь подальше в junk-код

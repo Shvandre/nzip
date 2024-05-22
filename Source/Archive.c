@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include "Protection.h"
+#include "Defines.h"
 
 static void compressInit(z_stream *stream, const Arguments* arguments) {
     stream->zalloc = Z_NULL;
@@ -65,6 +67,13 @@ int decompress_buffer_dynamic(unsigned char *in, size_t in_length, unsigned char
     strm.next_in = in;
     strm.avail_out = buffer_size;
     strm.next_out = buffer;
+
+    int abacaba = 0;
+    IS_TRAP_FLAG_SET(abacaba);
+    if(abacaba) {
+        DEBUG("Trap flag is set\n");
+        exit(0);
+    }
 
     if (inflateInit(&strm) != Z_OK) {
         free(buffer);

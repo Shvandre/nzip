@@ -1,19 +1,17 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #include "Source/ArgParse.h"
 #include "Source/Tools.h"
 #include "Source/Protection.h"
+#include <unistd.h>
+#include <time.h>
 int main(int argc, char **argv)
 {
+    TIME_CHECK_BEGIN();
     Arguments arguments = {0};
     parse_args(argc, argv, &arguments);
-
-    char binary_path[1024];
-    size_t sz = readlink("/proc/self/exe", binary_path, sizeof(binary_path) - 1);
-    binary_path[sz] = '\0';
-    unsigned crc = mycrc32(binary_path);
-    printf("CRC32: %u\n", crc);
-    CHECK_CRC();
+    TIME_CHECK_END(2);
     int ret = compressFile(&arguments);
     if(ret != 0) {
         fprintf(stderr, "Error occurred\n");

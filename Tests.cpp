@@ -9,8 +9,8 @@ extern "C" {
 
 TEST(TestArgs, TestArgs1) {
     Arguments arguments = {nullptr};
-    char* argv[] = {"zip", "-v", "--compression=9", "file.txt", "LOL.zip"};
-    parse_args(5, argv, &arguments);
+    char* argv[] = {"zip", "--compression=9", "file.txt", "LOL.zip"};
+    parse_args(4, argv, &arguments);
     ASSERT_STREQ(arguments.args[0], "file.txt");
     ASSERT_STREQ(arguments.args[1], "LOL.zip");
     ASSERT_EQ(arguments.block_size_int, 4096);
@@ -20,6 +20,7 @@ TEST(TestArgs, TestArgs2) {
     Arguments arguments = {nullptr};
     char* argv[] = {"zip", "--bs=8K", "-s", "-c=7", "Makefile"};
     parse_args(5, argv, &arguments);
+   
     ASSERT_STREQ(arguments.args[0], "Makefile");
     ASSERT_STREQ(arguments.args[1], "archive.zip");
     ASSERT_EQ(arguments.block_size_int, 8192);
@@ -72,7 +73,7 @@ TEST(Mapping, Test1) {
 
 TEST(RoundTests, Test1) {
     Arguments arguments = {nullptr};
-    char *argv[] = {"zip", "--bs=8K", "-v", "Makefile"}; //Assuming that Makefile is 100% in our Directory
+    char *argv[] = {"zip", "--bs=8K", "-s", "Makefile"}; //Assuming that Makefile is 100% in our Directory
     parse_args(4, argv, &arguments);
     compressFile(&arguments);
     uncompressFile("archive.zip", "output.txt");
@@ -99,15 +100,18 @@ TEST(RoundTests, LargeFile) {
     free(buffer);
 
     Arguments arguments = {nullptr};
-    char *argv[] = {"zip", "-b=100M", "-v", "largefileWithNoNameConflict"};
+    char *argv[] = {"zip", "-b=100M", "-s", "largefileWithNoNameConflict"};
     parse_args(4, argv, &arguments);
     compressFile(&arguments);
     uncompressFile("archive.zip", "output.txt");
     //Compare largefile and output.txt using default diff utility
     if(!system("cmp largefileWithNoNameConflict output.txt")) {
+        //Delete 
+        remove("largefileWithNoNameConflict");
         SUCCEED();
     }
     else{
+        remove("largefileWithNoNameConflict");
         FAIL();
     }
 }

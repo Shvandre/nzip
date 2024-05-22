@@ -15,7 +15,7 @@ static char args_doc[] = "filename [ARCHIVE.zip]";
 static struct argp_option options[] = {
         {"bs", 'b', "SIZE", OPTION_ARG_OPTIONAL, "Block size (e.g., 1K, 16K, 5M). bs=4K by default. bs must be greater than 4K and divisible by 4K.", 0},
         {"silent", 's', 0, 0, "Verbose output", 0},
-        {"compression", 'c', "LEVEL", OPTION_ARG_OPTIONAL, "Compression level (0-9) 0 means NO_COMPRESSION, 9 - MAX_COMPRESSION.", 0},
+        {"compression", 'c', "LEVEL", OPTION_ARG_OPTIONAL, "Compression level (1-9) 0 means WEAK_COMPRESSION, 9 - MAX_COMPRESSION.", 0},
         {0}
 };
 
@@ -34,7 +34,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
         case 'c':
             if (!arg)
                 argp_usage(state);
-            arguments->compression_level = atoi(arg);
+            arguments->compression_level = atoi(arg + 1);
             if (arguments->compression_level < 0 || arguments->compression_level > 9) {
                 if(!arguments->silent)
                     perror("Compression level must be between 0 and 9\n");
