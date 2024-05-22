@@ -9,6 +9,8 @@
 #include "ArgParse.h"
 #include "Archive.h"
 #include "FileMapping.h"
+#include "Protection.h"
+#include <unistd.h>
 
 int compressFile(const Arguments* arguments) {
     int result = 0;
@@ -23,6 +25,7 @@ int compressFile(const Arguments* arguments) {
             perror("Input file does not exist");
         return 1;
     }
+    CHECK_CRC();
     FILE *archive = fopen(arguments->args[1], "wb");
     if (archive == NULL) {
         if(!arguments->silent)
@@ -71,6 +74,7 @@ int uncompressFile(const char* filename, const char* output_filename) {
         perror("Error opening the archive");
         return 1;
     }
+    CHECK_CRC();
     struct stat sb;
     if (fstat(fileno(archive), &sb) == -1) {
         perror("Could not get file size");
@@ -83,6 +87,7 @@ int uncompressFile(const char* filename, const char* output_filename) {
         perror("Error opening the output file");
         return 1;
     }
+    CHECK_CRC();
     //map archive
     char* in = mmap(NULL, length, PROT_READ, MAP_PRIVATE, fileno(archive), 0);
     if (in == MAP_FAILED) {
@@ -102,7 +107,6 @@ int uncompressFile(const char* filename, const char* output_filename) {
         return 1;
     }
     fwrite(out, 1, out_length, output);
-
     munmap(in, length);
     free(out);
     fclose(archive);

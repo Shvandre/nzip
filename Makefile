@@ -1,6 +1,6 @@
 CC=gcc
 CXX=g++
-CFLAGS=-std=c11 --coverage -Wall -Wextra -g -fpermissive
+CFLAGS=-std=c11 --coverage -Wall -Wextra -g
 LDFLAGS=-lz --coverage
 SANFLAGS=-g -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 GTEST_LIBS = -lgtest -lgtest_main -pthread
@@ -14,10 +14,13 @@ all: build-san
 
 # Custom target to build both executables
 build: zip unzip
+	python3 PostProcessing.py zip
+	python3 PostProcessing.py unzip
 
 # Build with sanitizers
 build-san: zip-san unzip-san
-
+	python3 PostProcessing.py zip-san
+	python3 PostProcessing.py unzip-san
 # zip executable
 zip: $(OBJS) zip.o
 	$(CC) -o $@ $^ $(LDFLAGS)

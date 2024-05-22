@@ -18,12 +18,13 @@ TEST(TestArgs, TestArgs1) {
 
 TEST(TestArgs, TestArgs2) {
     Arguments arguments = {nullptr};
-    char* argv[] = {"zip", "--bs=8K", "-v", "-c=7", "Makefile"};
+    char* argv[] = {"zip", "--bs=8K", "-s", "-c=7", "Makefile"};
     parse_args(5, argv, &arguments);
     ASSERT_STREQ(arguments.args[0], "Makefile");
     ASSERT_STREQ(arguments.args[1], "archive.zip");
     ASSERT_EQ(arguments.block_size_int, 8192);
-    ASSERT_EQ(arguments.verbose, 1);
+    ASSERT_EQ(arguments.silent, 1);
+    ASSERT_EQ(arguments.compression_level, 7);
 }
 
 
@@ -35,7 +36,7 @@ TEST(TestArgs, TestWrongArgs) {
 
 TEST(TestArgs, TestWrongArgs2) {
     Arguments arguments = {nullptr};
-    char* argv[] = {"zip", "--bs=8K", "-v", "-c=20", "Makefile", "archive.zip", "extra"};
+    char* argv[] = {"zip", "--bs=8K", "-s", "-c=20", "Makefile", "archive.zip", "extra"};
     ASSERT_DEATH(parse_args(7, argv, &arguments), ".*");
 }
 

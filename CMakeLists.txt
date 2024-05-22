@@ -23,3 +23,16 @@ add_library(code STATIC ${SOURCE_FILES})
 # Тесты
 add_executable(runTests Tests.cpp)
 target_link_libraries(runTests gtest gtest_main code z)
+
+# run Python script on binary
+add_custom_command(
+        TARGET zip
+        POST_BUILD
+        COMMAND python3 PostProcessing.py zip
+)
+
+add_custom_command(
+        TARGET unzip
+        POST_BUILD
+        COMMAND python3 PostProcessing.py unzip
+)
